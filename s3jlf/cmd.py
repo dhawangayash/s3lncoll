@@ -85,6 +85,8 @@ class Action (CmdIO):
         shutil.copyfileobj (f_in, f_out)
       fname = fname + ".gz"
     client.upload_file (fname, self.p_to.bucket, out_f)
+    if not self.args.compress:
+      os.unlink (fname)
 
   @retryp.retryp (expose_last_exc = True, log_faults = True)
   @logtool.log_call
