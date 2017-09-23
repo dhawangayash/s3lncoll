@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 from __future__ import absolute_import
-import boto3, botocore, clip, logging, logtool, os
-import retryp, StringIO, threading, urlparse
+import boto3, clip, gzip, logging, logtool, os, progressbar
+import retryp, shutil, threading, urlparse
 from collections import namedtuple
-from progress.bar import Bar
 from .cmdio import CmdIO
-from .jsonstream import JsonStream
+from .jsonstream import jsonstream
 from .rotatingfile_ctx import RotatingFile_Ctx
 
 LOG = logging.getLogger (__name__)
@@ -21,7 +20,8 @@ class _ProgressPercentage (object):
     self._size = float (os.path.getsize (filename))
     self._lock = threading.Lock ()
     self.quiet = quiet
-    self.progress = Bar ("Sending", max = 100) if not quiet else None
+    self.progress = (progressbar.ProgressBar (max_value = self._size)
+                     if not quiet else None)
 
   @logtool.log_call
   def __enter__ (self):
@@ -34,9 +34,9 @@ class _ProgressPercentage (object):
 
   @logtool.log_call
   def __call__ (self, bytes_amount):
-    if not self.quiet:
+    if self.progress:
       with self._lock:
-        self.progress.next (n = int (100 * bytes_amount / self._size))
+        self.progress.update (bytes_amount)
 
 class Action (CmdIO):
 
@@ -66,7 +66,9 @@ class Action (CmdIO):
   @logtool.log_call
   def _cleanup (self):
     if not self.args.delete:
-      for key in (Bar ("Deleting").iter (self.keys)
+      if not self.args.quiet:
+        print "Deleting..."
+      for key in (progressbar.ProgressBar () (self.keys)
                   if not self.args.quiet else self.keys):
         key.delete ()
 
@@ -75,8 +77,14 @@ class Action (CmdIO):
   def _send (self, ndx, fname):
     client = boto3.client("s3")
     out_f = self.p_to.key.format (ndx)
-    with _ProgressPercentage (out_f, self.args.quiet) as cb:
-      client.upload_file (fname, self.p_to.bucket, out_f, Callback = cb)
+    if not self.args.quiet:
+      print out_f
+    if not self.args.compress:
+      with open(fname, "rb") as f_in, \
+           gzip.open (fname + ".gz", "wb") as f_out:
+        shutil.copyfileobj (f_in, f_out)
+      fname = fname + ".gz"
+    client.upload_file (fname, self.p_to.bucket, out_f)
 
   @retryp.retryp (expose_last_exc = True, log_faults = True)
   @logtool.log_call
@@ -87,34 +95,19 @@ class Action (CmdIO):
 
   @logtool.log_call
   def _pipedata (self):
-    with _ProgressPercentage ("Reading", self.args.quiet) as cb:
-      with RotatingFile_Ctx (cb, self._send, block = self.args.block) as rf:
-        for line in JsonStream (self.p_from.bucket, self.keys):
-          rf.write (line)
-
-  @retryp.retryp (expose_last_exc = True, log_faults = True)
-  @logtool.log_call
-  def _check (self):
-    if self.check:
-      return False
-    try:
-      boto3.client ("s3").head_object (
-        Bucket = self.p_to.bucket,
-        Key = self.p_to.key)
-      self.error ("Target exists: %s" % self.args.url_to)
-      return True
-    except botocore.exceptions.ClientError as e:
-      if int (e.response["Error"]["Code"]) == 404:
-        client = boto3.client("s3")
-        client.upload_fileobj (
-          StringIO.StringIO (), self.p_to.bucket, self.p_to.key)
-        return False
-      raise
+    if not self.args.quiet:
+      print "Streaming inputs..."
+    progress = (progressbar.ProgressBar (max_value = len (self.keys),
+                                         redirect_stdout = True)
+                if not self.args.quiet else None)
+    with RotatingFile_Ctx (self._send, block = self.args.block) as rf:
+      for line in jsonstream (self.keys, cb = progress.update):
+        rf.write (line)
+    if progress:
+      progress.finish ()
 
   @logtool.log_call
   def run (self):
-    if self._check ():
-      clip.exit (err = True)
     self._list_from ()
     self._pipedata ()
     self._cleanup ()

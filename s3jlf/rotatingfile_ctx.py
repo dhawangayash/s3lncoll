@@ -5,21 +5,20 @@ import logtool, tempfile
 class RotatingFile_Ctx (object):
 
   @logtool.log_call
-  def __init__ (self, if_cb, of_cb, block = 1024, start = 0):
-    self.if_cb = if_cb
-    self.of_cb = of_cb
+  def __init__ (self, cb, block = 1024, start = 0):
+    self.cb = cb
+    self.block = block
     self.count = start
     self.fh = None
-    self.block = block
     self.length = 0
 
   @logtool.log_call
   def _file_done (self):
     if self.fh is not None:
       self.fh.close ()
-      self.of_cb (self.count, self.fh.name)
       self.count += 1
-      self.fh.delete ()
+      self.cb (self.count, self.fh.name)
+      self.fh.unlink (self.fh.name)
       self.fh = None
     self.fh = tempfile.NamedTemporaryFile (
       prefix = "s3jlf__", delete = False)

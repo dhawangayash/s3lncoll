@@ -12,7 +12,7 @@ in S3 under a destination key template.
   
   Arguments:
     from [text]  S3 URL prefix to clump
-      to [text]    S3 URL for target clump ('{}' will be the count)
+      to [text]  S3 URL for target clump ('{}' will be the count)
       
       Options:
         -h, --help             Show this help message and exit

@@ -29,9 +29,8 @@ sys.stderr = StreamWriter (sys.stderr)
 APP = clip.App (name = "s3jlf")
 
 CONFIG = Dict ({
-  "check": False,
-  "force": False,
   "block": BLOCK_LIMIT,
+  "force": False,
   "nocolour": False,
   "delete": False,
   "quiet": False,
@@ -60,9 +59,6 @@ def option_logging (flag):
            tree_view = "-H")
 @clip.flag ("-H", "--HELP",
             help = "Help for all sub-commands")
-@clip.flag ("-c", "--check", name = "check",
-            help = "Don't check for target (may over-write)",
-            callback = partial (option_setopt, "check"))
 @clip.flag ("-C", "--nocolour", name = "nocolour",
             help = "Suppress colours in reports",
             callback = partial (option_setopt, "nocolour"))
