@@ -42,8 +42,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "s3jlf-"
-    cfg.versionfile_source = "s3jlf/_version.py"
+    cfg.parentdir_prefix = "s3lncoll-"
+    cfg.versionfile_source = "s3lncoll/_version.py"
     cfg.verbose = False
     return cfg
 

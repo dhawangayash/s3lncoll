@@ -21,12 +21,13 @@ class RotatingFile_Ctx (object):
       self.fh.unlink (self.fh.name)
       self.fh = None
     self.fh = tempfile.NamedTemporaryFile (
-      prefix = "s3jlf__", delete = False)
+      prefix = "s3lncoll__", delete = False)
     self.length = 0
 
   @logtool.log_call
   def write (self, data):
-    if self.fh is None or self.length + len (data) > self.block:
+    if self.fh is None or (self.length != 0
+                           and self.length + len (data) > self.block):
       self._file_done ()
     self.fh.write (data)
     self.length += len (data)

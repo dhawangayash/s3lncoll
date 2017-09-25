@@ -6,7 +6,6 @@ from addict import Dict
 from encodings.utf_8 import StreamWriter
 from functools import partial
 from path import Path
-from .cmdio import CmdIO
 from .cmd import Action
 
 from ._version import get_versions
@@ -26,19 +25,17 @@ BLOCK_LIMIT = 1024 * 1024
 sys.stdout = StreamWriter (sys.stdout)
 sys.stderr = StreamWriter (sys.stderr)
 
-APP = clip.App (name = "s3jlf")
+APP = clip.App (name = "s3lncoll")
 
 CONFIG = Dict ({
   "block": BLOCK_LIMIT,
   "force": False,
-  "nocolour": False,
   "delete": False,
+  "json": "False",
   "quiet": False,
   "time_str": TIME_STR,
   "time_t": TIME_T,
-  "verbose": False,
 })
-IO = CmdIO (conf = CONFIG)
 
 @logtool.log_call
 def option_setopt (option, value):
@@ -55,40 +52,35 @@ def option_logging (flag):
   CONFIG.debug = flag
 
 @APP.main (name = Path (sys.argv[0]).basename (),
-           description = "Stream and chump JSONL files in chumks",
+           description = "Line stream s3 files into ~uniform lumps",
            tree_view = "-H")
 @clip.flag ("-H", "--HELP",
             help = "Help for all sub-commands")
-@clip.flag ("-C", "--nocolour", name = "nocolour",
-            help = "Suppress colours in reports",
-            callback = partial (option_setopt, "nocolour"))
 @clip.flag ("-D", "--debug", name = "debug", help = "Enable debug logging",
             callback = option_logging)
 @clip.flag ("-d", "--delete", name = "delete",
-            help = "Don't delete source files",
+            help = "Delete source files/keys",
             callback = partial (option_setopt, "delete"))
+@clip.flag ("-j", "--json", name = "json",
+            help = "Validate each line as JSONM",
+            callback = partial (option_setopt, "json"))
 @clip.flag ("-q", "--quiet", name = "quiet",
             help = "Be quiet, be vewy vewy quiet",
             callback = partial (option_setopt, "verbose"))
-@clip.flag ("-v", "--verbose", name = "verbose",
-            help = "Verbose output",
-            callback = option_version)
 @clip.flag ("-V", "--version", name = "verbose",
             help = "Report installed version",
             callback = option_version)
 @clip.flag ("-z", "--compress", name = "compress",
-            help = "Don't compress the target",
+            help = "Ccompress (gzip) the target(s)",
             callback = partial (option_setopt, "compress"))
 @clip.opt ("-b", "--blocksize", default = BLOCK_LIMIT,
-           help = "Size of pre-compressed output files in bytes.")
+           help = "Maximum size of pre-compressed output files in bytes.")
 @clip.arg ("from", help = "S3 URL prefix to clump")
 @clip.arg ("to", help = "S3 URL for target clump ('{}' will be the count)")
 @logtool.log_call
 def app_main (**kwargs):
   if not CONFIG.conf.debug:
     logging.basicConfig (level = logging.ERROR)
-  if not sys.stdout.isatty ():
-    option_setopt ("nocolour", True)
   CONFIG.url_from = kwargs["from"]
   CONFIG.url_to = kwargs["to"]
   Action (CONFIG).run ()

@@ -4,8 +4,7 @@ from __future__ import absolute_import
 import boto3, clip, gzip, logging, logtool, os, progressbar
 import retryp, shutil, threading, urlparse
 from collections import namedtuple
-from .cmdio import CmdIO
-from .jsonstream import jsonstream
+from .linestream import linestream
 from .rotatingfile_ctx import RotatingFile_Ctx
 
 LOG = logging.getLogger (__name__)
@@ -38,11 +37,10 @@ class _ProgressPercentage (object):
       with self._lock:
         self.progress.update (bytes_amount)
 
-class Action (CmdIO):
+class Action (object):
 
   @logtool.log_call
   def __init__ (self, args):
-    CmdIO.__init__ (self, conf = args)
     self.args = args
     self.p_from = self._parse_url ("Source", args.url_from)
     self.p_to = self._parse_url ("Destination", args.url_to)
@@ -58,14 +56,14 @@ class Action (CmdIO):
     rc = _urlspec (protocol = p.scheme, bucket = p.netloc,
                    key = p.path[1:] if p.path.startswith ("/") else p.path)
     if rc.protocol != "s3":
-      self.error ("%s protocol is not s3: %s" % (typ, url))
+      print "%s protocol is not s3: %s" % (typ, url)
       clip.exit (err = True)
     return rc
 
   @retryp.retryp (expose_last_exc = True, log_faults = True)
   @logtool.log_call
   def _cleanup (self):
-    if not self.args.delete:
+    if self.args.delete:
       if not self.args.quiet:
         print "Deleting..."
       for key in (progressbar.ProgressBar () (self.keys)
@@ -79,7 +77,7 @@ class Action (CmdIO):
     out_f = self.p_to.key.format (ndx)
     if not self.args.quiet:
       print out_f
-    if not self.args.compress:
+    if self.args.compress:
       with open(fname, "rb") as f_in, \
            gzip.open (fname + ".gz", "wb") as f_out:
         shutil.copyfileobj (f_in, f_out)
@@ -103,7 +101,8 @@ class Action (CmdIO):
                                          redirect_stdout = True)
                 if not self.args.quiet else None)
     with RotatingFile_Ctx (self._send, block = self.args.block) as rf:
-      for line in jsonstream (self.keys, cb = progress.update):
+      for line in linestream (self.keys, cb = progress.update,
+                              validate = self.args.json):
         rf.write (line)
     if progress:
       progress.finish ()

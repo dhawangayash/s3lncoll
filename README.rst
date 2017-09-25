@@ -1,29 +1,29 @@
-S3jlf
-=====
+s3lncoll
+========
 
-Reads a series of files from S3 and pipes them into a series of files
-in S3 under a destination key template.  
+Read files from S3 as defined by a key prefix and map them by lines to
+a set of optionally gzip compressed output files in S3, with the
+output files limited by (pre-compressed) file size.  The string "{}"
+in the output key will be substituted with the (zero-based) index of
+the output files.
 
 ::
 
-  s3jlf: Stream and chump JSONL files in chumks
+  s3lncoll: Line stream s3 files into ~uniform lumps
   
-  Usage: s3jlf {{arguments}} {{options}}
+  Usage: s3lncoll {{arguments}} {{options}}
   
   Arguments:
     from [text]  S3 URL prefix to clump
-      to [text]  S3 URL for target clump ('{}' will be the count)
+      to [text]    S3 URL for target clump ('{}' will be the count)
       
       Options:
         -h, --help             Show this help message and exit
         -H, --HELP             Help for all sub-commands
-        -c, --check            Don't check for target (may over-write)
-        -C, --nocolour         Suppress colours in reports
         -D, --debug            Enable debug logging
-        -d, --delete           Don't delete source files
+        -d, --delete           Delete source files/keys
+        -j, --json             Validate each line as JSONM
         -q, --quiet            Be quiet, be vewy vewy quiet
-        -v, --verbose          Verbose output
         -V, --version          Report installed version
-        -z, --compress         Don't compress the target
-        -b, --blocksize [int]  Size of pre-compressed output files in bytes. (default: 1048576)
-  
+        -z, --compress         Ccompress (gzip) the target(s)
+        -b, --blocksize [int]  Maximum size of pre-compressed output files in bytes. (default: 1048576)

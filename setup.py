@@ -5,7 +5,7 @@ import versioneer
 from io import open
 
 setup (
-    name = "s3jlf",
+    name = "s3lncoll",
     version = versioneer.get_version (),
     description = "Aggregate an S3 folder into a file in another",
     long_description = open ("README.rst", "r", encoding = "utf-8").read (),
@@ -14,7 +14,7 @@ setup (
     keywords = "S3 aggregate tarball compress",
     author = "J C Lawrence",
     author_email = "claw@kanga.nu",
-    url = "https://pypi.python.org/pypi/s3jlf",
+    url = "https://pypi.python.org/pypi/s3lncoll",
     license = "LGPL v3.0",
     packages = find_packages (exclude = ["tests",]),
     package_data = {
@@ -25,7 +25,7 @@ setup (
                                           encoding = "utf-8").readlines ()],
     entry_points = {
         "console_scripts": [
-            "s3jlf = s3jlf.main:main",
+            "s3lncoll = s3lncoll.main:main",
         ],
     },
 )
