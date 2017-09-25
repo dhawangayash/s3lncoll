@@ -9,7 +9,7 @@ the output files.
 
 ::
 
-  s3lncoll: Line stream s3 files into ~uniform lumps
+  s3lncoll: Line stream s3 files into ~uniform lumps in S3
   
   Usage: s3lncoll {{arguments}} {{options}}
   

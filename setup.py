@@ -7,7 +7,7 @@ from io import open
 setup (
     name = "s3lncoll",
     version = versioneer.get_version (),
-    description = "Aggregate an S3 folder into a file in another",
+    description = "Line stream s3 files into ~uniform lumps in S3",
     long_description = open ("README.rst", "r", encoding = "utf-8").read (),
     cmdclass = versioneer.get_cmdclass (),
     classifiers = [],
