@@ -81,9 +81,10 @@ class Action (object):
       with open(fname, "rb") as f_in, \
            gzip.open (fname + ".gz", "wb") as f_out:
         shutil.copyfileobj (f_in, f_out)
+      os.unlink (fname)
       fname = fname + ".gz"
     client.upload_file (fname, self.p_to.bucket, out_f)
-    if not self.args.compress:
+    if self.args.compress:
       os.unlink (fname)
 
   @retryp.retryp (expose_last_exc = True, log_faults = True)
