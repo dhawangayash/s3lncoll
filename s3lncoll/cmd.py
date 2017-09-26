@@ -101,7 +101,8 @@ class Action (object):
                                          redirect_stdout = True)
                 if not self.args.quiet else None)
     with RotatingFile_Ctx (self._send, block = self.args.block) as rf:
-      for line in linestream (self.keys, cb = progress.update,
+      for line in linestream (self.keys,
+                              cb = (progress.update if progress else None),
                               validate = self.args.json):
         rf.write (line)
     if progress:

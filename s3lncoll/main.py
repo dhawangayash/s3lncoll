@@ -66,7 +66,7 @@ def option_logging (flag):
             callback = partial (option_setopt, "json"))
 @clip.flag ("-q", "--quiet", name = "quiet",
             help = "Be quiet, be vewy vewy quiet",
-            callback = partial (option_setopt, "verbose"))
+            callback = partial (option_setopt, "quiet"))
 @clip.flag ("-V", "--version", name = "verbose",
             help = "Report installed version",
             callback = option_version)
