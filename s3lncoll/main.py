@@ -83,6 +83,7 @@ def app_main (**kwargs):
     logging.basicConfig (level = logging.ERROR)
   CONFIG.url_from = kwargs["from"]
   CONFIG.url_to = kwargs["to"]
+  CONFIG.block = kwargs["blocksize"]
   Action (CONFIG).run ()
 
 @logtool.log_call
