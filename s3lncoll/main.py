@@ -73,7 +73,7 @@ def option_logging (flag):
 @clip.flag ("-z", "--compress", name = "compress",
             help = "Ccompress (gzip) the target(s)",
             callback = partial (option_setopt, "compress"))
-@clip.opt ("-b", "--blocksize", default = BLOCK_LIMIT,
+@clip.opt ("-b", "--blocksize", default = BLOCK_LIMIT, type = int,
            help = "Maximum size of pre-compressed output files in bytes.")
 @clip.arg ("from", help = "S3 URL prefix to clump")
 @clip.arg ("to", help = "S3 URL for target clump ('{}' will be the count)")
