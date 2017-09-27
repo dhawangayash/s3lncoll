@@ -100,7 +100,7 @@ class Action (object):
     progress = (progressbar.ProgressBar (max_value = len (self.keys),
                                          redirect_stdout = True)
                 if not self.args.quiet else None)
-    with RotatingFile_Ctx (self._send, block = self.args.block) as rf:
+    with RotatingFile_Ctx (self._send, block = int (self.args.block)) as rf:
       for line in linestream (self.keys,
                               cb = (progress.update if progress else None),
                               validate = self.args.json):
