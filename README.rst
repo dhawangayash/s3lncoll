@@ -27,3 +27,31 @@ the output files.
         -V, --version          Report installed version
         -z, --compress         Ccompress (gzip) the target(s)
         -b, --blocksize [int]  Maximum size of pre-compressed output files in bytes. (default: 1048576)
+
+
+Architecture
+============
+
+s3lncoll has a pipe and filter architecture which streams a set of keys as defined by a prefix 
+through a `LineStream`. `LineStream` reads the files under the keys and spits out a single line 
+via an iterator. `RotatingFileCtx` receives that stream of lines and aggregates them into chunked 
+files (of a maximum size or a single line, whichever is the larger), followed by flushing the 
+lines out to a provided S3 path.
+
++----------------------------------------------------------------------------------------------------+
+|                                                                                                    |
+|                   +------------+                +-------------------------+                        |
+|                   |            |                |                         |                        |
+|    bucket Keys    | LineStream |     Lines      |     RotatingFileCtx     |  S3 Files              |
+|    ------------>  |            |  ------------> |                         | ------------>          |
+|                   |            |                |                         |                        |
+|                   +------------+                +-------------------------+                        |
+|                                                                                                    |
+|                   +---------------------------+                                                    |
+|                   |                           |                                                    |
+|                   |     cmd.py: Scheduler     |                                                    |
+|                   |                           |                                                    |
+|                   +---------------------------+                                                    |
+|                                                                                                    |
+|                                                                                          s3lncoll  |
++----------------------------------------------------------------------------------------------------+

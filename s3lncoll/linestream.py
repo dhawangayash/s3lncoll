@@ -11,6 +11,7 @@ def linestream (keylist, cb = None, validate = False):
     with tempfile.NamedTemporaryFile (prefix = "s3lncoll_in__") as f:
       f.write (key.get ()["Body"].read ())
       f.seek (0)
+      f.flush()
       for line in file (f.name): # pylint: disable=not-an-iterable
         try:
           if validate:
