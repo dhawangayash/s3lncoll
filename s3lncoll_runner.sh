@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export AWS_ACCESS_KEY_ID=<<MAGIC>>
-export AWS_SECRET_ACCESS_KEY=<<MAGIC>>
+export AWS_ACCESS_KEY_ID=#<<MAGIC>>
+export AWS_SECRET_ACCESS_KEY=#<<MAGIC>>
 YEAR=$(date +%Y -d "1 hour ago")
 MONTH=$(date +%m -d "1 hour ago")
 DAY=$(date +%d -d "1 hour ago")
