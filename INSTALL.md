@@ -31,7 +31,7 @@ To run this script every hour in the said machine use the following script and h
 ```
 
 6/ The contents of s3lncoll_runner.sh is as given below
-[s3lncoll_runner.sh]https://github.com/dhawangayash/s3lncoll/blob/master/s3lncoll_runner.sh
+[s3lncoll_runner.sh](https://github.com/dhawangayash/s3lncoll/blob/master/s3lncoll_runner.sh)
 
 
 ```
